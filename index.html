@@ -336,6 +336,17 @@
             letter-spacing: 0.04em;
         }
 
+        .original-number {
+            padding: 3px 9px;
+            border: 1px solid #dbe5ef;
+            border-radius: 999px;
+            background: #f8fafc;
+            color: var(--muted);
+            font-size: 0.75rem;
+            font-weight: 650;
+            white-space: nowrap;
+        }
+
         .type-pill {
             padding: 3px 10px;
             border-radius: 999px;
@@ -825,6 +836,14 @@
             return question.type === "单选题" || question.type === "判断题";
         }
 
+        function getChoiceAnswer(question) {
+            if (question.type === "判断题") {
+                if (question.answer === "对") return "A";
+                if (question.answer === "错") return "B";
+            }
+            return question.answer;
+        }
+
         function isAnswerMissing(question) {
             return String(question.answer).includes("原整理稿未提供参考答案");
         }
@@ -872,11 +891,12 @@
             if (!question.options.length) return "";
             const selected = selectedAnswers.get(question.id);
             const answerVisible = visibleAnswers.has(question.id);
+            const correctChoice = getChoiceAnswer(question);
             const options = question.options.map((option) => {
                 const classes = ["option-item"];
                 if (selected === option.label) classes.push("selected");
-                if (answerVisible && option.label === question.answer) classes.push("correct-highlight");
-                if (answerVisible && selected === option.label && option.label !== question.answer) {
+                if (answerVisible && option.label === correctChoice) classes.push("correct-highlight");
+                if (answerVisible && selected === option.label && option.label !== correctChoice) {
                     classes.push("wrong-highlight");
                 }
                 return `
@@ -906,12 +926,12 @@
             `;
         }
 
-        function renderQuestionCard(question) {
+        function renderQuestionCard(question, practiceNumber) {
             const selected = selectedAnswers.get(question.id);
             const answerVisible = visibleAnswers.has(question.id);
             let resultPill = "";
             if (isChoiceQuestion(question) && answerVisible && selected) {
-                const correct = selected === question.answer;
+                const correct = selected === getChoiceAnswer(question);
                 resultPill = `<span class="result-pill ${correct ? "correct" : "wrong"}">${correct ? "回答正确" : "回答错误"}</span>`;
             }
 
@@ -919,7 +939,8 @@
                 <article class="question-card" data-question-id="${question.id}">
                     <div class="card-header">
                         <div class="card-meta">
-                            <span class="question-number">Q ${String(question.id).padStart(3, "0")}</span>
+                            <span class="question-number">练习第 ${practiceNumber} 题</span>
+                            <span class="original-number">原第 ${question.id} 题</span>
                             <span class="type-pill ${typeClasses[question.type] || "single"}">${question.type}</span>
                             ${resultPill}
                         </div>
@@ -964,16 +985,20 @@
                 `;
                 return;
             }
-            questionContainer.innerHTML = filtered.map(renderQuestionCard).join("");
+            questionContainer.innerHTML = filtered
+                .map((question, index) => renderQuestionCard(question, index + 1))
+                .join("");
         }
 
         function refreshQuestionCard(questionId) {
             const question = questionMap.get(questionId);
             const card = questionContainer.querySelector(`[data-question-id="${questionId}"]`);
+            const filtered = getFilteredQuestions();
+            const practiceNumber = filtered.findIndex((item) => item.id === questionId) + 1;
             if (question && card) {
-                card.outerHTML = renderQuestionCard(question);
+                card.outerHTML = renderQuestionCard(question, practiceNumber);
             }
-            updateControls(getFilteredQuestions());
+            updateControls(filtered);
         }
 
         window.handleOptionClick = function (questionId, optionLabel) {
@@ -982,8 +1007,11 @@
             selectedAnswers.set(questionId, optionLabel);
             visibleAnswers.add(questionId);
             refreshQuestionCard(questionId);
-            const result = optionLabel === question.answer ? "回答正确" : `回答错误，正确答案是 ${question.answer}`;
-            showToast(`第 ${questionId} 题：${result}`);
+            const result = optionLabel === getChoiceAnswer(question)
+                ? "回答正确"
+                : `回答错误，正确答案是 ${question.answer}`;
+            const practiceNumber = getFilteredQuestions().findIndex((question) => question.id === questionId) + 1;
+            showToast(`练习第 ${practiceNumber} 题（原第 ${questionId} 题）：${result}`);
         };
 
         window.toggleQuestionAnswer = function (questionId) {

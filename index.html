@@ -59,7 +59,7 @@
         .page {
             width: min(1120px, calc(100% - 32px));
             margin: 0 auto;
-            padding: 48px 0 180px;
+            padding: 48px 0 110px;
         }
 
         .hero {
@@ -635,7 +635,7 @@
         .back-to-top {
             position: fixed;
             right: max(22px, calc((100vw - 1180px) / 2));
-            bottom: 132px;
+            bottom: 72px;
             z-index: 30;
             width: 44px;
             height: 44px;
@@ -656,7 +656,7 @@
         .toast {
             position: fixed;
             left: 50%;
-            bottom: 122px;
+            bottom: 72px;
             z-index: 50;
             padding: 10px 16px;
             border-radius: 12px;
@@ -680,81 +680,60 @@
             bottom: 14px;
             z-index: 40;
             width: min(1120px, calc(100% - 20px));
-            padding: 10px 13px 11px;
+            padding: 7px 9px;
             border: 1px solid rgba(219, 229, 239, 0.96);
-            border-radius: 20px;
+            border-radius: 16px;
             background: rgba(255, 255, 255, 0.95);
             box-shadow: 0 16px 44px rgba(15, 23, 42, 0.16);
             backdrop-filter: blur(16px);
             transform: translateX(-50%);
         }
 
-        .stats-heading {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            margin: 0 3px 7px;
-            color: #334155;
-            font-size: 0.77rem;
-            font-weight: 750;
-        }
-
-        .stats-heading span:last-child {
-            color: #94a3b8;
-            font-weight: 500;
-        }
-
         .stats-list {
             display: flex;
-            gap: 7px;
+            gap: 6px;
             overflow-x: auto;
             padding-bottom: 1px;
             scrollbar-width: thin;
         }
 
         .stat-card {
-            flex: 1 1 145px;
-            min-width: 137px;
-            padding: 7px 9px;
+            flex: 1 1 140px;
+            min-width: 134px;
+            padding: 6px 8px;
             border: 1px solid #e2e8f0;
-            border-radius: 12px;
+            border-radius: 10px;
             background: #f8fafc;
         }
 
-        .stat-card-head,
-        .stat-card-values {
+        .stat-card-row {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 7px;
-        }
-
-        .stat-card-head {
+            gap: 5px;
             margin-bottom: 3px;
             color: #1e293b;
-            font-size: 0.77rem;
+            font-size: 0.68rem;
+            white-space: nowrap;
+        }
+
+        .stat-type {
             font-weight: 750;
         }
 
-        .stat-progress-percent {
+        .stat-progress-text {
             color: #64748b;
-            font-size: 0.69rem;
+            font-weight: 500;
         }
 
-        .stat-card-values {
-            margin-bottom: 5px;
-            color: #64748b;
-            font-size: 0.68rem;
-        }
-
+        .stat-accuracy { font-weight: 750; }
         .stat-accuracy.good { color: #15803d; }
         .stat-accuracy.medium { color: #b45309; }
         .stat-accuracy.low { color: #b91c1c; }
         .stat-accuracy.neutral { color: #94a3b8; }
 
         .stat-track {
-            height: 4px;
+            height: 3px;
             overflow: hidden;
             border-radius: 999px;
             background: #e2e8f0;
@@ -816,17 +795,13 @@
 
             .back-to-top {
                 right: 14px;
-                bottom: 122px;
+                bottom: 68px;
             }
 
             .stats-dock {
                 bottom: 8px;
-                padding: 9px 10px;
-                border-radius: 16px;
-            }
-
-            .stats-heading {
-                margin-bottom: 5px;
+                padding: 7px 8px;
+                border-radius: 14px;
             }
 
             .stat-card {
@@ -874,10 +849,6 @@
     <button class="back-to-top" id="backToTopBtn" type="button" title="回到顶部" aria-label="回到顶部">↑</button>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <aside class="stats-dock" aria-label="各题型进度与正确率">
-        <div class="stats-heading">
-            <span>各题型进度 · 正确率</span>
-            <span>滚动时始终可见</span>
-        </div>
         <div class="stats-list" id="statsList"></div>
     </aside>
 
@@ -1118,13 +1089,10 @@
 
                 return `
                     <div class="stat-card">
-                        <div class="stat-card-head">
-                            <span>${type}</span>
-                            <span class="stat-progress-percent">${progressPercent}%</span>
-                        </div>
-                        <div class="stat-card-values">
-                            <span>${progressLabel} ${completed}/${typeQuestions.length}</span>
-                            <span class="stat-accuracy ${accuracyClass}">${accuracyText}</span>
+                        <div class="stat-card-row">
+                            <span class="stat-type">${type}</span>
+                            <span class="stat-progress-text">${progressLabel} ${completed}/${typeQuestions.length}</span>
+                            <span class="stat-accuracy ${accuracyClass}" title="${accuracyText}">${accuracy === null ? "—" : `${accuracy}%`}</span>
                         </div>
                         <div class="stat-track"><span style="width:${progressPercent}%"></span></div>
                     </div>`;
